@@ -8,33 +8,33 @@
           <td colspan="4">{{output || 0}}</td>
         </tr>
         <tr class="operadores">
-          <td v-on:click="clearField">C</td>
-          <td>&lt;</td>
+          <td @click="clearField">C</td>
+          <td @click="setNegativeOrPositive">+/-</td>
           <td @click="percentage">%</td>
-          <td>/</td>
+          <td @click="processOperation('divide')">/</td>
         </tr>
         <tr class="operadores">
-          <td class="numbers">7</td>
-          <td class="numbers">8</td>
-          <td class="numbers">9</td>
-          <td class="operadores">x</td>
+          <td class="numbers" v-on:click="getNumber('7')">7</td>
+          <td class="numbers" v-on:click="getNumber('8')">8</td>
+          <td class="numbers" v-on:click="getNumber('9')">9</td>
+          <td class="operadores" v-on:click="processOperation('multiply')">x</td>
         </tr>
         <tr class="operadores">
-          <td class="numbers">4</td>
-          <td class="numbers">5</td>
-          <td class="numbers">6</td>
-          <td class="operadores">-</td>
+          <td class="numbers" v-on:click="getNumber('4')">4</td>
+          <td class="numbers" v-on:click="getNumber('5')">5</td>
+          <td class="numbers" v-on:click="getNumber('6')">6</td>
+          <td class="operadores" v-on:click="processOperation('minus')">-</td>
         </tr>
         <tr class="operadores">
-          <td class="numbers">1</td>
-          <td class="numbers">2</td>
-          <td class="numbers">3</td>
-          <td class="operadores">+</td>
+          <td class="numbers" v-on:click="getNumber('1')">1</td>
+          <td class="numbers" v-on:click="getNumber('2')">2</td>
+          <td class="numbers" v-on:click="getNumber('3')">3</td>
+          <td class="operadores" v-on:click="processOperation('plus')">+</td>
         </tr>
         <tr>
-          <td colspan="2" class="numbers">0</td>
-          <td class="numbers">.</td>
-          <td class="operadores">=</td>
+          <td colspan="2" class="numbers" v-on:click="getNumber('0')">0</td>
+          <td class="numbers" v-on:click="getDot">.</td>
+          <td class="operadores" v-on:click="updateOutput" @keypress.enter.prevent="updateOutput">=</td>
         </tr>
       </tbody>
     </table>
@@ -49,15 +49,57 @@ export default {
   },
   data(){
     return{
-      output: '80'
+      output: '',
+      previousValue: null,
+      operationFired: false
     } 
   },
   methods:{
     clearField(){
-      this.output = '0';
+      this.output = '';
     },
     percentage(){
-      this.output /= 100; 
+      this.output = parseFloat(this.output)/100; 
+    },
+    setNegativeOrPositive(){
+      this.output = this.output[0] === '-' ? this.output.slice(1) : `${-this.output}`;
+    },
+    getNumber(number){
+      if(this.operationFired){
+        this.output = '';
+        this.operationFired = false;
+      }
+      this.output = `${this.output}${number}`;
+    },
+    getDot(){
+      if(this.output.indexOf('.') === -1){
+        this.output = this.output + '.';
+      }
+    },
+    processOperation(operation){
+      if(operation === 'plus'){
+        this.operation = (a, b) => {
+          return parseFloat(a) + parseFloat(b);
+        }
+      } else if(operation === 'minus'){
+        this.operation = (a, b) => {
+          return parseFloat(a) - parseFloat(b);
+        }
+      } else if(operation === 'multiply'){
+        this.operation = (a, b) => {
+          return parseFloat(a) * parseFloat(b);
+        }
+      } else if(operation === 'divide'){
+        this.operation = (a, b) => {
+          return parseFloat(a) / parseFloat(b);
+        }
+      }
+      this.previousValue = this.output;
+      this.operationFired = true;
+    },
+    updateOutput(){
+      this.output = `${this.operation(this.previousValue, this.output)}`;
+      this.previousValue = null;
     }
   }
 }
@@ -65,31 +107,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
 .operadores{
-  background-color: black;
-  color: orangered;
+  background-color: rgb(190, 190, 190);
 }
 .numbers{
-  background-color: rgb(32, 32, 32);
-  color: white;
+  background-color: white;
 }
 .resultado{
-  background-color: rgb(32, 32, 32);
-  color: orange;
+  background-color: #42b983;
 }
 td:active{
   background-color: gray;
