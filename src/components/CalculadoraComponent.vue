@@ -10,7 +10,7 @@
         <tr class="operadores">
           <td @click="clearField">C</td>
           <td @click="setNegativeOrPositive">+/-</td>
-          <td @click="percentage">%</td>
+          <td @click="processOperation('percentage')">%</td>
           <td @click="processOperation('divide')">/</td>
         </tr>
         <tr class="operadores">
@@ -58,9 +58,6 @@ export default {
     clearField(){
       this.output = '';
     },
-    percentage(){
-      this.output = parseFloat(this.output)/100; 
-    },
     setNegativeOrPositive(){
       this.output = this.output[0] === '-' ? this.output.slice(1) : `${-this.output}`;
     },
@@ -92,6 +89,11 @@ export default {
       } else if(operation === 'divide'){
         this.operation = (a, b) => {
           return parseFloat(a) / parseFloat(b);
+        }
+      }
+      else if(operation === 'percentage'){
+        this.operation = (a, b) => {
+          return (parseFloat(a) * parseFloat(b)) / 100;
         }
       }
       this.previousValue = this.output;
